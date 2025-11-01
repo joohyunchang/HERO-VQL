@@ -20,7 +20,7 @@ arxiv: https://arxiv.org/abs/2509.00385
 # video: https://www.youtube.com/results?search_query=turing+machine
 code: https://github.com/KHU-VLL/HERO-VQL
 # data: https://huggingface.co/docs/datasets
-local_video: /static/video/HERO-VQL.mp4
+local_video: ./static/video/HERO-VQL.mp4
 highlight: "🔥 BMVC 2025 Oral Paper"
 footnote: "* Equally contributed first authors. † Corresponding author."
 ---
