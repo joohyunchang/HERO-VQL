@@ -1,0 +1,84 @@
+defaults:
+  - _self_
+  - augment: base
+  - model: hero
+  - dataset: vq2d
+  - override hydra/job_logging: none
+  - override hydra/hydra_logging: none
+
+
+
+# frequently overridden parameters
+random_seed: 42
+batch_size: 3
+num_workers: 6
+prefetch_factor: 4
+base_lr: 0.0003  # 3e-4
+compile: false
+backbone_precision: 'fp32'  # bf16 or fp32 or fp16
+backbone_fp32_mm_precision: 'highest'  # medium or high or highest
+
+
+# runtime parameters
+jid: ${oc.env:SLURM_JOB_ID}
+job_type: ${job_type:}  # debug or batch
+YY: ${now:%Y}
+mm: ${now:%m}  # month
+dd: ${now:%d}  # day
+runtime_outdir: ${runtime_outdir:}
+num_gpus: ${oc.env:SLURM_GPUS_ON_NODE,1}
+total_bsz: ${eval:'${dataset.batch_size} * ${oc.env:SLURM_GPUS_ON_NODE,1} * ${oc.env:SLURM_JOB_NUM_NODES,1}'}
+max_steps: ${eval:'${trainer.max_epochs} * ${dataset.num_train_samples} // ${total_bsz} + 1'}
+
+
+run_type: train  # train, val, test, predict=eval
+
+
+trainer:
+  ##### directly affects to performance #####
+  devices: 'auto'  # maximum available
+  num_nodes: ${eval:'${oc.env:SLURM_JOB_NUM_NODES,1}'}
+  max_epochs: 106
+  max_steps: ${max_steps}
+  accumulate_grad_batches: 1
+  precision: 32-true  # don't edit this, we autocast manually
+  gradient_clip_val: 20.
+  detect_anomaly: False
+  benchmark: True
+  deterministic: False  # sorry
+  ##### logging or automl #####
+  log_every_n_steps: 1
+  logger:
+    - _target_: lightning.pytorch.loggers.WandbLogger
+      project: 'ltvu++'
+      entity: 'team-khu'
+      group: 'base'  # for grouping runs (does not mean an organization)
+      job_type: ${job_type}  # debug or batch
+      name: hg-${jid}  # displayname
+      tags: []  # for filtering
+      notes: null  # real note, a log string
+      save_dir: ${runtime_outdir}  # logs will be saved under THIS/wandb
+      log_model: False    # as we use custom checkpointing
+
+optim:
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: ${eval:'${base_lr} / 24 * ${total_bsz}'}  # 0.0003 / 24 (official bsz) * (ours bsz)
+    weight_decay: 0.005
+  lr_scheduler:
+    # 1000(official steps) * 24(official bsz) / (ours bsz)
+    # warmup_iter: ${eval:'1000 * 24 / ${total_bsz}'}
+    warmup_iter: 1000
+    max_steps: ${max_steps}
+
+loss:
+  positive_threshold: .2
+  logit_scale: 1.   # reciprocal of temperature
+  weight_bbox_center: 1.
+  weight_bbox_hw: 1.
+  weight_bbox_giou: .3
+  weight_prob: 100.
+
+hydra:
+  run:
+    dir: ./outputs/${job_type}/${YY}-${mm}-${dd}/${jid}

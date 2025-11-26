@@ -1,0 +1,7 @@
+defaults:
+  - base
+  - _self_
+
+predict_val: true
+predict_test: true
+eval_config: eval
