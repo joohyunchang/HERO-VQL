@@ -4,7 +4,7 @@
 
 
 This repository is the official implementation of the paper **"HERO-VQL: Hierarchical, Egocentric and Robust Visual Query Localization"**, accepted as an **Oral** presentation at BMVC 2025🔥.  
-[[Project page]](https://khu-vll.github.io/HERO-VQL/)
+[[Project page]](https://joohyunchang.github.io/HERO-VQL/)
 
 # Project Website
 
