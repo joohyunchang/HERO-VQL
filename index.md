@@ -15,7 +15,7 @@ authors:
 affiliations:
     - <sup>1</sup>Kyung Hee University
     - <sup>2</sup>AI R&D Division, CJ Group
-paper: https://bmva-archive.org.uk/bmvc/2025/assets/papers/Paper_610/paper.pdf
+paper: https://bmvc2025.bmva.org/proceedings/610/
 arxiv: https://arxiv.org/abs/2509.00385
 # video: https://www.youtube.com/results?search_query=turing+machine
 code: https://github.com/KHU-VLL/HERO-VQL
